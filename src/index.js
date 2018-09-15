@@ -1,9 +1,7 @@
-
-
+import createElement from './createElement.js'
+import render from './render.js'
 
 export default React = {
-  nextReactRootIndex: 0,
-  createClass,
   createElement,
-  render,
+  render
 }
