@@ -1,6 +1,6 @@
 
 /**
- * 暴露给用户的React方法，用来生成一个ReacClass实例
+ * 暴露给用户的React方法，用来生成一个ReactClass实例
  * 
  * @return {function} Constructor
  */

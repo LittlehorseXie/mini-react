@@ -35,6 +35,8 @@ ReactCompositeComponent.prototype.mountComponent = function (rootId) {
 
   return renderedMarkup
 }
+// 
+// 
 ReactCompositeComponent.prototype.receiveComponent = function (nextElement, nextState) {
   this._currentElement = nextElement || this._currentElement
   const inst = this._instance
