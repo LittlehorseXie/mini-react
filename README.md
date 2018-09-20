@@ -20,7 +20,7 @@ React.render('hello word', document.getElementById('app'))
 </div>
 ```
 
-表面上看，我们只用到了`React.render`一个方法，但实际上'hello word'的渲染还使用了`React.createElement`来生成一个React的虚拟DOM--`ReactElement`。
+表面上看，我们只用到了`React.render`一个方法，但实际上'hello word'的渲染还使用了`React.createElement`来生成一个React的虚拟DOM--`ReactElement`实例对象。
 
 也就是说，上面的代码，规范来写的话应该类似下面：
 

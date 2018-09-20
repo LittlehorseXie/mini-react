@@ -1,3 +1,23 @@
+/**
+ * 
+ * @param {ReactElement} element
+ * 
+ * @property {ReactElement} _currentElement
+ * @property {string} _rootNodeId
+ * @property {ReactClass} _instance
+ * @property {ReactDOMTextComponent || ReactDOMComponent || ReactCompositeComponent} _renderedComponent
+ * 
+ * @method mountComponent 
+ *    React.render时调用
+ *    调用componentWillMount 和 componentDidMount生命周期函数
+ *    返回render函数内的元素 markup后 拼接好的DOM串
+ * @method receiveComponent 
+ *    setState时调用
+ *    调用componentWillUpdate 和 componentDidUpdate生命周期函数
+ *    接收两个参数 nextElement 和 nextState
+ *    当调用setState时，nextElement = null，传入nextState，更新_instance的state
+ */
+
 function ReactCompositeComponent (element) {
   this._currentElement = element
   this._rootNodeId = null
@@ -35,8 +55,6 @@ ReactCompositeComponent.prototype.mountComponent = function (rootId) {
 
   return renderedMarkup
 }
-// 
-// 
 ReactCompositeComponent.prototype.receiveComponent = function (nextElement, nextState) {
   this._currentElement = nextElement || this._currentElement
   const inst = this._instance
@@ -77,7 +95,11 @@ function _shouldUpdateReactComponent (prevElement, nextElement) {
   if (prevElement && nextElement) {
     const prevType = prevElement.type
     const nextType = nextElement.type
-
+    if (prevType === 'string' || prevType === 'number') {
+      return nextType === 'string' || nextType === 'number'
+    } else {
+      return nextType === 'object' && prevElement.type === nextElement.type && prevElement.key === nextElement.key
+    }
   }
   return false
 }
