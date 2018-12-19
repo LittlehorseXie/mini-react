@@ -1,11 +1,14 @@
-// 通过继承React.createClass生成
+/**
+ * 通过React.createClass生成
+ */
 
-function ReactClass () {
+export default function ReactClass () {
+
 }
-ReactClass.prototype.render = function () {}
 
-ReactClass.prototype.setState = function (newState) {
+ReactClass.prototype.render = function () {
+}
+ReactClass.prototype.setState = function(newState) {
   this._reactInternalInstance.receiveComponent(null, newState)
-}
 
-export default ReactClass
+}

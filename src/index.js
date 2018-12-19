@@ -1,7 +1,9 @@
-import createElement from './createElement.js'
+import createClass from './createClass.js'
+import creatElement from './creatElement.js'
 import render from './render.js'
 
 export default React = {
-  createElement,
+  createClass,
+  creatElement,
   render
 }

@@ -1,43 +1,71 @@
-本小马励志从0开始实现一个简单的mini-react
+### 从最简单的开始
 
-### 先从最简单的开始
-
-首先我们使用最简单react的时候，一定是类似下面的用法
-
-```html
-<!-- dom 结构 -->
-<div id="app"></div>
-```
 ```javascript
-// react插入虚拟dom
-React.render('hello word', document.getElementById('app'))
-```
+React.render('hello world',document.getElementById("container"))
 
-最后生成的html为:
-```html
-<div id="app">
-  <span data-reactid="0">hello word</span>
+// 对应的html为
+<div id="container"></div>
+
+// 生成的html为
+<div id="container">
+  <span data-reactid="0">hello world</span>
 </div>
 ```
+功能点：
+React.render
 
-表面上看，我们只用到了`React.render`一个方法，但实际上'hello word'的渲染还使用了`React.createElement`来生成一个React的虚拟DOM--`ReactElement`实例对象。
-
-也就是说，上面的代码，规范来写的话应该类似下面：
+### 引入基本element
 
 ```javascript
-function hello () {
-  alert('hello')
+function hello() {
+  alert('hi')
 }
-// 通过React.createElement生成一个ReactElement类型的element
-const element = React.createElement('div', {id: 'test', onclick: hello}, 'click me')
-// 通过React.render像html中插入虚拟dom--element
-React.render(element, document.getElementById('app'))
-```
+var element = React.creatElement('div', {id: 'test', onclick: hello}, 'click me')
+React.render(element,document.getElementById("container"))
 
-生成的html为：
-```html
-<div data-reactid="0" id="test">
-    <span data-reactid="0.0">click me</span>
+// 生成的html为
+<div id="test">
+  <span data-reactid="0">click me</span>
 </div>
-<!-- 点击文字，会弹出hello的对话框 -->
+// 点击文字，弹出hi对话框
 ```
+功能点：
+React.creatElement -- type, config, children
+React.render
+
+### 自定义元素
+```javascript
+var HelloMessage = React.createClass({
+  getInitialState: function() {
+    return {type: 'say:'};
+  },
+  componentWillMount: function() {
+    console.log('我就要开始渲染了。。。')
+  },
+  componentDidMount: function() {
+    console.log('我已经渲染好了。。。')
+  },
+  changeType:function(){
+    this.setState({type:'shout:'})
+  },
+  render: function() {
+    return React.createElement("div", {onclick: this.changeType}, this.state.type, "Hello ", this.props.name);
+  }
+});
+
+React.render(React.createElement(HelloMessage, {name: "John"}), document.getElementById("container"));
+
+// 生成的html为
+<div data-reactid="0">
+  <span data-reactid="0.0">say:</span>
+  <span data-reactid="0.1">Hello </span>
+  <span data-reactid="0.2">John</span>
+</div>
+// 点击文字，say会变成shout
+```
+功能点：
+React.createClass
+React.createElement -- type, config, children
+React.render
+
+## 按文件梳理
