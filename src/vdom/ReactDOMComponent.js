@@ -24,6 +24,7 @@ ReactDOMComponent.prototype.mountComponent = function (rootID) {
   var childrenInstances = []
   children && children.forEach((child, index) => {
     var childInstance = instantiateReactComponent(child)
+    childInstance._mountIndex = index
     childrenInstances.push(childInstance)
     var childRootId = this._rootNodeID + '.' + index
     var childMarkup = childInstance.mountComponent(childRootId)
@@ -97,20 +98,94 @@ function flattenChildren(componentChildren) {
 function generateComponentChildren(prevChildren, nextChildrenElements) {
   var nextChildren = {}
   nextChildrenElements.forEach((child, index) => {
-    var key = child.key ? child.key : index
+    var key = child.key || index
     var prevChild = prevChildren && prevChildren[key]
     var prevElement = prevChild && prevChild._currentElement
     var nextElement = child
     if (_shouldUpdateReactComponent(prevElement, nextElement)) {
-      
+      prevChild.receiveComponent(nextElement)
+      nextChildren[key] = prevChild
+    } else {
+      var nextChildInstance = instantiateReactComponent(nextElement)
+      nextChildren[key] = nextChildInstance
     }
-
   })
   return nextChildren
 }
 
-ReactDOMComponent.prototype._diff = function (diffQueue, nextChildrenElements) {
+// 差异更新的几种类型
+var UPDATE_TYPES = {
+  MOVE_EXISTING: 1,   // 没有更改的子节点
+  REMOVE_NODE: 2,     // 需要删除的节点
+  INSERT_MARKUP: 3    // 新增节点
+}
 
+ReactDOMComponent.prototype._diff = function (diffQueue, nextChildrenElements) {
+  var self = this
+  var prevChildren = flattenChildren(self._renderedChildren)
+  var nextChildren = generateComponentChildren(prevChildren, nextChildrenElements)
+  self._renderedChildren = []
+  Object.keys(nextChildren).forEach(child => {
+    self._renderedChildren.push(child)
+  })
+  var childIndex = 0
+  for (key in nextChildren) {
+    var prevChild = prevChildren && prevChildren[key]
+    var nextChild = nextChildren[key]
+    if (prevChild === nextChild) {
+      diffQueue.push({
+        parentId: self._rootNodeID,
+        parentNode: $('[data-reactid=' + self._rootNodeID + ']'),
+        type: UPDATE_TYPES.MOVE_EXISTING,
+        fromIndex: prevChild._mountIndex,
+        toIndex: childIndex
+      })
+    } else {
+      // 如果之前存在，需要push删除类型的节点
+      if (prevChild) {
+        diffQueue.push({
+          parentId: self._rootNodeID,
+          parentNode: $('[data-reactid=' + self._rootNodeID + ']'),
+          type: UPDATE_TYPES.REMOVE_NODE,
+          fromIndex: prevChild._mountIndex,
+          toIndex: null
+        })
+        // 未完成 如果以前已经渲染过了，记得先去掉以前所有的事件监听，通过命名空间全部清空
+        if (prevChild._rootNodeID) {
+          $(document).undelegate('.' + prevChild._rootNodeID);
+        }
+      }
+      // push新节点
+      diffQueue.push({
+        parentId: self._rootNodeID,
+        parentNode: $('[data-reactid=' + self._rootNodeID + ']'),
+        type: UPDATE_TYPES.INSERT_MARKUP,
+        fromIndex: null,
+        toIndex: childIndex,
+        markup: nextChild.mountComponent()
+      })
+    }
+    nextChild._mountIndex = childIndex
+    childIndex++
+  }
+
+  // 处理新节点里没有，但是旧节点里有的节点
+  for (key in prevChildren) {
+    if (prevChildren.hasOwnProperty(key) && !(nextChildren && nextChildren.hasOwnProperty(key))) {
+      var prevChild = prevChildren[key]
+      diffQueue.push({
+        parentId: self._rootNodeID,
+        parentNode: $('[data-reactid=' + self._rootNodeID + ']'),
+        type: UPDATE_TYPES.REMOVE_NODE,
+        fromIndex: prevChild._mountIndex,
+        toIndex: null
+      })
+      // 未完成 如果以前已经渲染过了，记得先去掉以前所有的事件监听，通过命名空间全部清空
+      if (prevChild._rootNodeID) {
+        $(document).undelegate('.' + prevChild._rootNodeID);
+      }
+    }
+  }
 }
 ReactDOMComponent.prototype._patch = function () {
   
